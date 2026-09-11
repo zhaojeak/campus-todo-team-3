@@ -5,6 +5,8 @@ import edu.hbuas.campustodo.model.Task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 任务服务，负责管理任务的生命周期。
@@ -92,7 +94,7 @@ public class TaskService {
      * @return 不可修改的筛选结果列表，按插入顺序排列；无匹配时返回空列表
      * @throws IllegalArgumentException 当 priority 为 {@code null} 时
      */
-    public List<Task> filterByPriority(Priority priority) {
+    public List<Task> filterByPriority(Task.Priority priority) {
         if (priority == null) {
             throw new IllegalArgumentException("Priority must not be null.");
         }

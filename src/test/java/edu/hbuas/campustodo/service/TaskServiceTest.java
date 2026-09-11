@@ -4,7 +4,7 @@ import edu.hbuas.campustodo.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import edu.hbuas.campustodo.model.Task.Priority;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
