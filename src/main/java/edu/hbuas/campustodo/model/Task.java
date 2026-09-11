@@ -18,9 +18,20 @@ package edu.hbuas.campustodo.model;
  */
 public class Task {
 
+    /**
+     * 任务优先级。
+     *
+     * <p>Issue #1 引入，共三档：{@code HIGH}、{@code MEDIUM}、{@code LOW}。
+     * 新建任务若未指定优先级，默认为 {@code MEDIUM}。
+     */
+    public enum Priority {
+        HIGH, MEDIUM, LOW
+    }
+
     private long id;
     private String title;
     private boolean completed;
+    private Priority priority;
 
     /**
      * 默认构造方法，供框架或测试工具使用。
@@ -38,6 +49,7 @@ public class Task {
         this.id = id;
         this.title = title;
         this.completed = false;
+        this.priority = Priority.MEDIUM;
     }
 
     public long getId() {
@@ -64,8 +76,16 @@ public class Task {
         this.completed = completed;
     }
 
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
     @Override
     public String toString() {
-        return "Task{id=" + id + ", title='" + title + "', completed=" + completed + "}";
+        return "Task{id=" + id + ", title='" + title + "', completed=" + completed + ", priority=" + priority + "}";
     }
 }
