@@ -5,6 +5,7 @@ import edu.hbuas.campustodo.model.Task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * 任务服务，负责管理任务的生命周期。
@@ -63,5 +64,29 @@ public class TaskService {
      */
     public List<Task> listAll() {
         return Collections.unmodifiableList(tasks);
+    }
+
+    /**
+     * 将指定 id 的任务标记为已完成。
+     *
+     * <p>任务不存在时抛出 {@link NoSuchElementException}；任务已经完成时抛出
+     * {@link IllegalStateException}，禁止重复完成同一任务。
+     *
+     * @param id 任务编号
+     * @return 被标记为已完成的任务对象
+     * @throws NoSuchElementException 当 id 对应的任务不存在时
+     * @throws IllegalStateException  当任务已经处于完成状态时
+     */
+    public Task completeTask(long id) {
+        for (Task task : tasks) {
+            if (task.getId() == id) {
+                if (task.isCompleted()) {
+                    throw new IllegalStateException("Task with id " + id + " is already completed.");
+                }
+                task.setCompleted(true);
+                return task;
+            }
+        }
+        throw new NoSuchElementException("No task found with id: " + id);
     }
 }
