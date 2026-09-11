@@ -1,11 +1,10 @@
 package edu.hbuas.campustodo.service;
 
 import edu.hbuas.campustodo.model.Task;
-import edu.hbuas.campustodo.model.Task.Priority;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import edu.hbuas.campustodo.model.Task.Priority;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -132,6 +131,28 @@ class TaskServiceTest {
         assertThrows(UnsupportedOperationException.class,
                 () -> all.add(new Task(99, "Injected")),
                 "返回的列表应不可修改，防止外部绕过 addTask 改变内部状态");
+    }
+
+    @Test
+    void testCompleteTask_shouldMarkTaskAsCompleted() {
+        TaskService service = new TaskService();
+        service.addTask("待完成任务");
+        service.completeTask(1L);
+        // 断言任务已完成（比如 task.isCompleted() == true）
+    }
+
+    @Test
+    void testCompleteTask_shouldThrowWhenTaskNotFound() {
+        TaskService service = new TaskService();
+        assertThrows(IllegalArgumentException.class, () -> service.completeTask(999L));
+    }
+
+    @Test
+    void testCompleteTask_shouldThrowWhenAlreadyCompleted() {
+        TaskService service = new TaskService();
+        service.addTask("已完成任务");
+        service.completeTask(1L);
+        assertThrows(IllegalStateException.class, () -> service.completeTask(1L));
     }
 
     // ================================================================

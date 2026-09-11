@@ -1,11 +1,11 @@
 package edu.hbuas.campustodo.service;
 
 import edu.hbuas.campustodo.model.Task;
-import edu.hbuas.campustodo.model.Task.Priority;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +67,23 @@ public class TaskService {
         return Collections.unmodifiableList(tasks);
     }
 
+    public void completeTask(long id) {
+        Task task = findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("任务不存在: " + id));
+
+        if (task.isCompleted()) {
+            throw new IllegalStateException("任务已完成: " + id);
+        }
+
+        task.setCompleted(true);
+    }
+
+    private Optional<Task> findById(long id) {
+        return tasks.stream()
+                .filter(t -> t.getId() == id)
+                .findFirst();
+    }
+
     /**
      * 按优先级筛选任务。
      *
@@ -77,7 +94,7 @@ public class TaskService {
      * @return 不可修改的筛选结果列表，按插入顺序排列；无匹配时返回空列表
      * @throws IllegalArgumentException 当 priority 为 {@code null} 时
      */
-    public List<Task> filterByPriority(Priority priority) {
+    public List<Task> filterByPriority(Task.Priority priority) {
         if (priority == null) {
             throw new IllegalArgumentException("Priority must not be null.");
         }
