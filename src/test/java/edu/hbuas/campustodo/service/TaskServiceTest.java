@@ -1,6 +1,7 @@
 package edu.hbuas.campustodo.service;
 
 import edu.hbuas.campustodo.model.Task;
+import edu.hbuas.campustodo.model.Task.Priority;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -131,5 +132,92 @@ class TaskServiceTest {
         assertThrows(UnsupportedOperationException.class,
                 () -> all.add(new Task(99, "Injected")),
                 "返回的列表应不可修改，防止外部绕过 addTask 改变内部状态");
+    }
+
+    // ================================================================
+    // 优先级筛选（Issue #1）
+    // ================================================================
+
+    @Test
+    @DisplayName("addTask：新建任务默认优先级为 MEDIUM")
+    void addTask_defaultPriorityIsMedium() {
+        Task task = service.addTask("Default priority task");
+
+        assertEquals(Priority.MEDIUM, task.getPriority(), "新建任务默认优先级应为 MEDIUM");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：只返回指定优先级的任务，保持插入顺序")
+    void filterByPriority_returnsMatchingTasksInOrder() {
+        Task high = service.addTask("High task");
+        high.setPriority(Priority.HIGH);
+        Task medium = service.addTask("Medium task");
+        Task low = service.addTask("Low task");
+        low.setPriority(Priority.LOW);
+        Task high2 = service.addTask("Another high task");
+        high2.setPriority(Priority.HIGH);
+
+        List<Task> highTasks = service.filterByPriority(Priority.HIGH);
+
+        assertEquals(2, highTasks.size(), "应返回 2 个 HIGH 优先级任务");
+        assertEquals("High task", highTasks.get(0).getTitle(), "第一个 HIGH 任务应为 High task");
+        assertEquals("Another high task", highTasks.get(1).getTitle(), "第二个 HIGH 任务应为 Another high task");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：无匹配优先级时返回空列表")
+    void filterByPriority_noMatch_returnsEmptyList() {
+        service.addTask("Only medium task");
+
+        List<Task> highTasks = service.filterByPriority(Priority.HIGH);
+
+        assertNotNull(highTasks, "filterByPriority 不应返回 null");
+        assertTrue(highTasks.isEmpty(), "无匹配任务时应返回空列表");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：空任务库时返回空列表")
+    void filterByPriority_emptyRepository_returnsEmptyList() {
+        List<Task> result = service.filterByPriority(Priority.LOW);
+
+        assertNotNull(result, "filterByPriority 不应返回 null");
+        assertTrue(result.isEmpty(), "空任务库筛选应返回空列表");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：null 优先级应抛出 IllegalArgumentException")
+    void filterByPriority_withNullPriority_throwsException() {
+        service.addTask("Some task");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.filterByPriority(null),
+                "null 优先级应被拒绝");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：返回的列表不可修改")
+    void filterByPriority_returnsUnmodifiableList() {
+        Task high = service.addTask("High task");
+        high.setPriority(Priority.HIGH);
+
+        List<Task> filtered = service.filterByPriority(Priority.HIGH);
+
+        assertThrows(UnsupportedOperationException.class,
+                () -> filtered.add(new Task(99, "Injected")),
+                "筛选结果列表应不可修改");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：各优先级均能正确筛选")
+    void filterByPriority_allPrioritiesWork() {
+        Task high = service.addTask("H");
+        high.setPriority(Priority.HIGH);
+        Task medium = service.addTask("M");
+        Task low = service.addTask("L");
+        low.setPriority(Priority.LOW);
+
+        assertEquals(1, service.filterByPriority(Priority.HIGH).size(), "HIGH 应有 1 个");
+        assertEquals(1, service.filterByPriority(Priority.MEDIUM).size(), "MEDIUM 应有 1 个");
+        assertEquals(1, service.filterByPriority(Priority.LOW).size(), "LOW 应有 1 个");
     }
 }
