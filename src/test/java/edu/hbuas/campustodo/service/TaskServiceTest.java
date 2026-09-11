@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -131,5 +132,38 @@ class TaskServiceTest {
         assertThrows(UnsupportedOperationException.class,
                 () -> all.add(new Task(99, "Injected")),
                 "返回的列表应不可修改，防止外部绕过 addTask 改变内部状态");
+    }
+
+    // ================================================================
+    // 完成任务
+    // ================================================================
+
+    @Test
+    @DisplayName("completeTask：存在的任务应被标记为已完成")
+    void completeTask_withExistingId_marksTaskCompleted() {
+        Task task = service.addTask("Write report");
+
+        service.completeTask(task.getId());
+
+        assertTrue(task.isCompleted(), "存在的任务应被标记为已完成");
+    }
+
+    @Test
+    @DisplayName("completeTask：不存在的 id 应抛出 NoSuchElementException")
+    void completeTask_withUnknownId_throwsException() {
+        assertThrows(NoSuchElementException.class,
+                () -> service.completeTask(999L),
+                "不存在的任务 id 应被拒绝");
+    }
+
+    @Test
+    @DisplayName("completeTask：重复完成同一任务应抛出 IllegalStateException")
+    void completeTask_whenAlreadyCompleted_throwsException() {
+        Task task = service.addTask("Write report");
+        service.completeTask(task.getId());
+
+        assertThrows(IllegalStateException.class,
+                () -> service.completeTask(task.getId()),
+                "已完成的任务不应被重复完成");
     }
 }
