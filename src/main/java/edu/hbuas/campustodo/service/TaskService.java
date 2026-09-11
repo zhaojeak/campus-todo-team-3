@@ -5,6 +5,7 @@ import edu.hbuas.campustodo.model.Task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 任务服务，负责管理任务的生命周期。
@@ -63,5 +64,22 @@ public class TaskService {
      */
     public List<Task> listAll() {
         return Collections.unmodifiableList(tasks);
+    }
+
+    public void completeTask(long id) {
+        Task task = findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("任务不存在: " + id));
+
+        if (task.isCompleted()) {
+            throw new IllegalStateException("任务已完成: " + id);
+        }
+
+        task.setCompleted(true);
+    }
+
+    private Optional<Task> findById(long id) {
+        return tasks.stream()
+                .filter(t -> t.getId() == id)
+                .findFirst();
     }
 }
