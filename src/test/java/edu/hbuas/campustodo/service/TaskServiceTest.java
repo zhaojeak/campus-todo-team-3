@@ -220,4 +220,50 @@ class TaskServiceTest {
         assertEquals(1, service.filterByPriority(Priority.MEDIUM).size(), "MEDIUM 应有 1 个");
         assertEquals(1, service.filterByPriority(Priority.LOW).size(), "LOW 应有 1 个");
     }
+
+    // ================================================================
+    // 判空保护（Review 反馈）
+    // ================================================================
+
+    @Test
+    @DisplayName("filterByPriority：空任务列表时对所有优先级筛选均不抛出 NullPointerException")
+    void filterByPriority_emptyTaskList_doesNotThrowNpe() {
+        // 任务列表初始为空，验证 stream() 调用不会因空列表而 NPE
+        assertDoesNotThrow(() -> service.filterByPriority(Priority.HIGH),
+                "空任务列表下筛选 HIGH 不应抛出异常");
+        assertDoesNotThrow(() -> service.filterByPriority(Priority.MEDIUM),
+                "空任务列表下筛选 MEDIUM 不应抛出异常");
+        assertDoesNotThrow(() -> service.filterByPriority(Priority.LOW),
+                "空任务列表下筛选 LOW 不应抛出异常");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：null 优先级抛出 IllegalArgumentException 而非 NullPointerException")
+    void filterByPriority_nullPriority_throwsIllegalArgumentNotNpe() {
+        service.addTask("Some task");
+
+        // 验证输入 null 时不会因调用 stream() 或 equals() 而抛出 NPE，
+        // 而是被前置判空拦截，抛出语义更明确的 IllegalArgumentException
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.filterByPriority(null),
+                "null 优先级应抛出 IllegalArgumentException");
+        assertNotNull(ex.getMessage(), "异常信息不应为空");
+    }
+
+    @Test
+    @DisplayName("filterByPriority：任务中存在 null 优先级元素时不崩溃，仅排除该元素")
+    void filterByPriority_taskWithNullPriority_doesNotCrash() {
+        Task normal = service.addTask("Normal task");
+        Task nullPriorityTask = service.addTask("Null priority task");
+        nullPriorityTask.setPriority(null);
+
+        // 筛选 MEDIUM 时，null 优先级的任务应被排除，不应抛出 NPE
+        List<Task> mediumTasks = assertDoesNotThrow(
+                () -> service.filterByPriority(Priority.MEDIUM),
+                "存在 null 优先级任务时筛选不应崩溃");
+
+        assertEquals(1, mediumTasks.size(), "应只返回优先级为 MEDIUM 的任务");
+        assertEquals("Normal task", mediumTasks.get(0).getTitle(),
+                "null 优先级的任务应被排除");
+    }
 }

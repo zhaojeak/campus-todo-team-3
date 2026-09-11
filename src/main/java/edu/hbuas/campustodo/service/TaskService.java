@@ -81,6 +81,9 @@ public class TaskService {
         if (priority == null) {
             throw new IllegalArgumentException("Priority must not be null.");
         }
+        if (tasks == null) {
+            return Collections.emptyList();
+        }
         List<Task> filtered = tasks.stream()
                 .filter(task -> priority.equals(task.getPriority()))
                 .collect(Collectors.toList());
