@@ -68,6 +68,14 @@ mvn -B verify
 Issue → 建分支 → 小步提交 → Push → Draft Pull Request
       → CI → Review → 修改 → Approve → Merge → 同步 main → 删除分支
 ```
+## 团队协作流程
+1. 根据Issue任务，从main分支新建feature功能分支
+2. 在功能分支开发，小步多次提交
+3. 推送远程分支，创建Draft Pull Request
+4. 等待GitHub Actions CI自动执行测试
+5. 请求组员Review评审代码，处理评审意见
+6. CI全部通过 + 获取至少1个Approve批准后，合并到main
+7. 合并完成，删除已经完成的功能分支
 
 - `main` 只保存可运行、测试通过的版本，禁止直接提交日常开发。
 - 分支命名：`feature/<issue号>-<简短主题>`，例如 `feature/1-priority-filter`。
@@ -93,3 +101,5 @@ git config --global --list
 | #1 Priority filter | 开发者 A | 增加 HIGH/MEDIUM/LOW；支持按优先级筛选 | 空结果返回空列表；默认 MEDIUM；测试覆盖 |
 | #2 Complete task | 开发者 B | 按编号完成任务；重复完成应报错 | 不存在编号报错；重复完成报错；测试覆盖 |
 | #3 CI and guide | 质量负责人 Q | 增加 Maven CI、PR 模板和 README 指南 | PR/main 触发；mvn verify 通过；模板可见 |
+
+
